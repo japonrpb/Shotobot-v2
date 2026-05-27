@@ -11,26 +11,35 @@ echo -e "${BLUE}║                 🤖 SHOTOBOT - INSTALADOR                  
 echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
-echo -e "${YELLOW}[1/6] Actualizando Termux...${NC}"
+# Asegurarse de estar en el home
+cd ~
+
+echo -e "${YELLOW}[1/7] Actualizando Termux...${NC}"
 pkg update -y && pkg upgrade -y
 
-echo -e "${YELLOW}[2/6] Instalando dependencias...${NC}"
+echo -e "${YELLOW}[2/7] Instalando dependencias...${NC}"
 pkg install -y nodejs-lts git python ffmpeg
 
-echo -e "${YELLOW}[3/6] Instalando yt-dlp...${NC}"
+echo -e "${YELLOW}[3/7] Instalando yt-dlp...${NC}"
 pip install yt-dlp
 
-echo -e "${YELLOW}[4/6] Descargando ShotoBot...${NC}"
-cd ~
-rm -rf shotobot 2>/dev/null
-git clone https://github.com/japonrpb/ShotoBot-v2.git shotobot
-cd shotobot
+echo -e "${YELLOW}[4/7] Eliminando instalación anterior...${NC}"
+rm -rf shotobot
 
-echo -e "${YELLOW}[5/6] Instalando dependencias de Node.js...${NC}"
+echo -e "${YELLOW}[5/7] Descargando ShotoBot...${NC}"
+git clone https://github.com/japonrpb/ShotoBot-v2.git shotobot
+
+echo -e "${YELLOW}[6/7] Instalando dependencias de Node.js...${NC}"
+cd shotobot
 npm install
 
-echo -e "${YELLOW}[6/6] Configurando carpetas...${NC}"
+echo -e "${YELLOW}[7/7] Configurando carpetas...${NC}"
 mkdir -p tmp bot_data
+
+# Crear alias para fácil inicio
+echo "" >> ~/.bashrc
+echo "# ShotoBot alias" >> ~/.bashrc
+echo "alias shotobot='cd ~/shotobot && node bot.js'" >> ~/.bashrc
 
 echo ""
 echo -e "${GREEN}╔════════════════════════════════════════════════════════════╗${NC}"
@@ -38,7 +47,8 @@ echo -e "${GREEN}║              ✅ SHOTOBOT INSTALADO CORRECTAMENTE          
 echo -e "${GREEN}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "${BLUE}📌 Para iniciar el bot:${NC}"
-echo -e "   ${YELLOW}cd ~/shotobot && node bot.js${NC}"
+echo -e "   ${YELLOW}shotobot${NC}"
+echo -e "   ${YELLOW}O también: cd ~/shotobot && node bot.js${NC}"
 echo ""
-echo -e "${BLUE}📌 Escanea el QR que aparece en la terminal${NC}"
+echo -e "${BLUE}📌 Si el QR se ve deforme, ajusta el zoom en Termux${NC}"
 echo ""
