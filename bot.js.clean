@@ -3,7 +3,7 @@ const qrcode = require('qrcode-terminal');
 const fs = require('fs');
 const path = require('path');
 
-const DATA_DIR = './bot_data_test';
+const DATA_DIR = './bot_data';
 const WARN_FILE = path.join(DATA_DIR, 'warns.json');
 const BAN_FILE = path.join(DATA_DIR, 'bans.json');
 const MODE_FILE = path.join(DATA_DIR, 'mode.json');
@@ -40,14 +40,14 @@ let economy = loadData(ECONOMY_FILE, {});
 let cooldowns = loadData(COOLDOWNS_FILE, {});
 
 // Configuración de bienvenidas y despedidas
-let welcomeSettings = loadData('./bot_data_test/welcome.json', {});
-let goodbyeSettings = loadData('./bot_data_test/goodbye.json', {});
+let welcomeSettings = loadData('./bot_data/welcome.json', {});
+let goodbyeSettings = loadData('./bot_data/goodbye.json', {});
 
 const defaultWelcomeMsg = '╭━━〔 🎉 𝐁𝐈𝐄𝐍𝐕𝐄𝐍𝐈𝐃𝐀 〕━━⬣\n┃ 👤 @user\n┃ ✨ ¡Bienvenido al grupo!\n┃ 📌 Lee las reglas y diviértete\n╰━━━━━━━━━━━━━━━━⬣';
 const defaultGoodbyeMsg = '╭━━〔 👋 𝐃𝐄𝐒𝐏𝐄𝐃𝐈𝐃𝐀 〕━━⬣\n┃ 👤 @user\n┃ 🚀 ¡Nos vemos pronto!\n┃ 💫 Siempre serás bienvenido\n╰━━━━━━━━━━━━━━━━⬣';
 
-function saveWelcomeConfig() { saveData('./bot_data_test/welcome.json', welcomeSettings); }
-function saveGoodbyeConfig() { saveData('./bot_data_test/goodbye.json', goodbyeSettings); }
+function saveWelcomeConfig() { saveData('./bot_data/welcome.json', welcomeSettings); }
+function saveGoodbyeConfig() { saveData('./bot_data/goodbye.json', goodbyeSettings); }
 
 let spamTracker = {};
 let russianRouletteTimers = {};
@@ -294,6 +294,7 @@ const piropos = [
     "💖 Me haces creer en finales felices.",
     "🌹 Si la perfección existiera, se llamaría como tú"
 ];
+
 // Insultos (30 insultos)
 const insultos = [
     "🤡 Eres más feo que un pie por detrás",
@@ -327,7 +328,6 @@ const insultos = [
     "🔮 Ser feo es normal, pero tú ya es profesional",
     "👻 Más espantoso que un fantasma en Halloween"
 ];
-
 // Datos curiosos (30 datos)
 const datosCuriosos = [
     "🐙 Los pulpos tienen tres corazones y sangre azul.",
@@ -654,8 +654,26 @@ function sellInventoryItem(userId, nombre, cantidad) {
     return { success: true, ganancia: totalGanancia, nombre: item.nombre, cantidad };
 }
 async function iniciarBot() {
-    const { state, saveCreds } = await useMultiFileAuthState('sesion_testSB');
+    const { state, saveCreds } = await useMultiFileAuthState('sesion_shotobot');
     
+    
+// CACHÉ PARA EVITAR RATE LIMIT
+const groupMetadataCache = new Map();
+
+async function getGroupMetadataCached(groupId) {
+    if (!groupId || !groupId.endsWith('@g.us')) {
+        return await sock.groupMetadata(groupId);
+    }
+    const now = Date.now();
+    const cached = groupMetadataCache.get(groupId);
+    if (cached && (now - cached.time) < 300000) {
+        return cached.data;
+    }
+    const data = await sock.groupMetadata(groupId);
+    groupMetadataCache.set(groupId, { data, time: now });
+    return data;
+}
+
     const sock = makeWASocket({
         auth: state,
         printQRInTerminal: false
@@ -665,8 +683,30 @@ async function iniciarBot() {
         const { connection, lastDisconnect, qr } = update;
         
         if (qr) {
+            console.log('');
+            console.log('╔════════════════════════════════════════════════════════════════════════════╗');
+            console.log('║                                                                                ║');
+            console.log('║                         🤍 𝐒𝐇𝐎𝐓𝐎𝐁𝐎𝐓 - 𝐄𝐒𝐂𝐀𝐍𝐄𝐀 𝐄𝐋 𝐐𝐑 ♥                         ║');
+            console.log('║                                                                                ║');
+            console.log('╚════════════════════════════════════════════════════════════════════════════╝');
+            console.log('');
+            console.log('📱 1. Abre WhatsApp en tu teléfono');
+            console.log('📱 2. Ve a WhatsApp Web (tres puntos → WhatsApp Web)');
+            console.log('📱 3. Escanea el código QR con tu teléfono');
+            console.log('');
+            console.log('┌────────────────────────────────────────────────────────────────────────────┐');
             qrcode.generate(qr, { small: true });
-            console.log('🔐 Escanea el QR con WhatsApp');
+            console.log('└────────────────────────────────────────────────────────────────────────────┘');
+            console.log('');
+            console.log('⏳ Esperando conexión...');
+            console.log('');
+            console.log('✨ *SHOTOBOT* - Tu asistente virtual');
+            console.log('💡 Una vez conectado, escribe #menu para ver todos los comandos');
+            console.log('');
+            console.log('╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮');
+            console.log('┃  🎮 #juegos  |  💰 #economia  |  🛡️ #proteccion  |  📥 #descargas  ┃');
+            console.log('╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯');
+            console.log('');
         }
         
         if (connection === 'open') {
@@ -692,7 +732,7 @@ async function iniciarBot() {
 
     async function isAdmin(groupId, userId) {
         try {
-            const groupMetadata = await sock.groupMetadata(groupId);
+            const groupMetadata = await getGroupMetadataCached(groupId);
             const participants = groupMetadata.participants;
             const user = participants.find(p => p.id === userId);
             return user && (user.admin === 'admin' || user.admin === 'superadmin');
@@ -873,6 +913,54 @@ async function iniciarBot() {
         return false;
     }
     // Procesar mensajes para protecciones
+    
+    // Evento de bienvenida y despedida
+    sock.ev.on('group-participants.update', async (update) => {
+        try {
+            const { id, participants, action } = update;
+            if (action === 'add') {
+                for (const user of participants) {
+                    if (welcomeSettings[id] && welcomeSettings[id].enabled) {
+                        let mensaje = welcomeSettings[id].message || defaultWelcomeMsg;
+                        let userId = user;
+                        if (typeof user !== 'string') userId = user.id || user;
+                        let nombre = userId;
+                        try {
+                            const contact = await sock.contactQuery(userId);
+                            nombre = contact.name || contact.notify || userId.split('@')[0];
+                        } catch(e) {
+                            nombre = userId.split('@')[0];
+                        }
+                        mensaje = mensaje.replace(/@user/g, '@' + nombre);
+                        await sock.sendMessage(id, { text: mensaje, mentions: [userId] });
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
+            }
+            if (action === 'remove') {
+                for (const user of participants) {
+                    if (goodbyeSettings[id] && goodbyeSettings[id].enabled) {
+                        let mensaje = goodbyeSettings[id].message || defaultGoodbyeMsg;
+                        let userId = user;
+                        if (typeof user !== 'string') userId = user.id || user;
+                        let nombre = userId;
+                        try {
+                            const contact = await sock.contactQuery(userId);
+                            nombre = contact.name || contact.notify || userId.split('@')[0];
+                        } catch(e) {
+                            nombre = userId.split('@')[0];
+                        }
+                        mensaje = mensaje.replace(/@user/g, '@' + nombre);
+                        await sock.sendMessage(id, { text: mensaje, mentions: [userId] });
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
+            }
+        } catch(e) {
+            console.log('Error en evento de grupo:', e.message);
+        }
+    });
+
     sock.ev.on('messages.upsert', async (m) => {
         const mensaje = m.messages[0];
         if (!mensaje.message) return;
@@ -1013,7 +1101,7 @@ async function iniciarBot() {
         // #top
         if (texto.startsWith('#top') && isGroupChat) {
             const topic = texto.replace('#top', '').trim() || 'SIN TEMA';
-            const groupMetadata = await sock.groupMetadata(remitente);
+            const groupMetadata = await getGroupMetadataCached(remitente);
             const participants = groupMetadata.participants;
             const shuffled = [...participants].sort(() => 0.5 - Math.random());
             const top10 = shuffled.slice(0, 10);
@@ -1186,7 +1274,7 @@ async function iniciarBot() {
         
         // #pareja
         if (texto === '#pareja' && isGroupChat) {
-            const groupMetadata = await sock.groupMetadata(remitente);
+            const groupMetadata = await getGroupMetadataCached(remitente);
             const participants = groupMetadata.participants;
             const shuffled = [...participants].sort(() => 0.5 - Math.random());
             const pareja1 = shuffled[0];
@@ -1950,7 +2038,7 @@ async function iniciarBot() {
         }
         // #rank
         if (texto === '#rank' && isGroupChat) {
-            const groupMetadata = await sock.groupMetadata(remitente);
+            const groupMetadata = await getGroupMetadataCached(remitente);
             const participants = groupMetadata.participants;
             const rankings = [];
             
@@ -2140,6 +2228,8 @@ async function iniciarBot() {
         }
         // ==================== MENÚ ====================
         
+        
+
         // #bienvenida on/off
         if (texto.startsWith('#bienvenida')) {
             const args = texto.split(' ');
@@ -2222,36 +2312,39 @@ async function iniciarBot() {
             await sock.sendMessage(remitente, { text: '╭━━〔 👋 𝐃𝐄𝐒𝐏𝐄𝐃𝐈𝐃𝐀 〕━━⬣\n┃ ✅ Mensaje de despedida actualizado\n╰━━━━━━━━━━━━━━━━⬣' });
         }
 
+
+
         // #addbot - Unirse a grupos
-        if (texto.startsWith('#addbot')) {
-            const link = texto.replace('#addbot', '').trim();
-            if (!link || !link.includes('chat.whatsapp.com')) {
-                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ 📌 #addbot (link de invitación)\n╰━━━━━━━━━━━━━━━━⬣' });
+        if (texto.startsWith("#addbot")) {
+            const link = texto.replace("#addbot", "").trim();
+            if (!link || !link.includes("chat.whatsapp.com")) {
+                await sock.sendMessage(remitente, { text: "╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ 📌 #addbot (link de invitación)\n╰━━━━━━━━━━━━━━━━⬣" });
                 return;
             }
-            await sock.sendMessage(remitente, { react: { text: '🕐', key: mensaje.key } });
+            await sock.sendMessage(remitente, { react: { text: "🕐", key: mensaje.key } });
             try {
-                let code = link.split('chat.whatsapp.com/')[1];
-                code = code.split('?')[0];
-                code = code.split('/')[0];
+                let code = link.split("chat.whatsapp.com/")[1];
+                code = code.split("?")[0];
+                code = code.split("/")[0];
                 if (!code || code.length < 5) throw new Error();
                 const groupInfo = await sock.groupGetInviteInfo(code);
                 const memberCount = groupInfo.size || groupInfo.participants?.length || 0;
                 if (memberCount < 15) {
-                    await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ADDBOT 〕━━━⬣\n┃ 📌 Grupo con ' + memberCount + ' miembros\n┃ ⚠️ Mínimo 15 miembros\n╰━━━━━━━━━━━━━━━━⬣' });
-                    await sock.sendMessage(remitente, { react: { text: '❌', key: mensaje.key } });
+                    await sock.sendMessage(remitente, { text: "╭━━〔 ❌ ADDBOT 〕━━━⬣\n┃ 📌 Grupo con " + memberCount + " miembros\n┃ ⚠️ Mínimo 15 miembros\n╰━━━━━━━━━━━━━━━━⬣" });
+                    await sock.sendMessage(remitente, { react: { text: "❌", key: mensaje.key } });
                     return;
                 }
-                await sock.sendMessage(remitente, { text: '╭━━〔 🔗 ADDBOT 〕━━━⬣\n┃ ✅ Grupo: ' + (groupInfo.subject || 'Sin nombre') + '\n┃ 👥 Miembros: ' + memberCount + '\n┃ ⏳ Me uniré en 1 minuto...\n╰━━━━━━━━━━━━━━━━⬣' });
+                await sock.sendMessage(remitente, { text: "╭━━〔 🔗 ADDBOT 〕━━━⬣\n┃ ✅ Grupo: " + (groupInfo.subject || "Sin nombre") + "\n┃ 👥 Miembros: " + memberCount + "\n┃ ⏳ Me uniré en 1 minuto...\n╰━━━━━━━━━━━━━━━━⬣" });
                 await new Promise(resolve => setTimeout(resolve, 60000));
                 await sock.groupAcceptInvite(code);
-                await sock.sendMessage(remitente, { text: '╭━━〔 ✅ ADDBOT 〕━━━⬣\n┃ 🎉 Me uní al grupo\n┃ 👑 Dame admin\n╰━━━━━━━━━━━━━━━━⬣', mentions: [sender] });
-                await sock.sendMessage(remitente, { react: { text: '✅', key: mensaje.key } });
+                await sock.sendMessage(remitente, { text: "╭━━〔 ✅ ADDBOT 〕━━━⬣\n┃ 🎉 Me uní al grupo\n┃ 👑 Dame admin\n╰━━━━━━━━━━━━━━━━⬣", mentions: [sender] });
+                await sock.sendMessage(remitente, { react: { text: "✅", key: mensaje.key } });
             } catch (error) {
-                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ ⚠️ Link inválido o expirado\n╰━━━━━━━━━━━━━━━━⬣' });
-                await sock.sendMessage(remitente, { react: { text: '❌', key: mensaje.key } });
+                await sock.sendMessage(remitente, { text: "╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ ⚠️ Link inválido o expirado\n╰━━━━━━━━━━━━━━━━⬣" });
+                await sock.sendMessage(remitente, { react: { text: "❌", key: mensaje.key } });
             }
         }
+
 
         // #menu
         if (texto === '#menu') {
@@ -2680,7 +2773,7 @@ By: ShotoBot | By: mikelennn | By: 2941160601`;
                 
                 // #tagall
                 if (command === '#tagall') {
-                    const groupMetadata = await sock.groupMetadata(remitente);
+                    const groupMetadata = await getGroupMetadataCached(remitente);
                     const participants = groupMetadata.participants;
                     const message = texto.replace('#tagall', '').trim() || 'Sin mensaje';
                     const mentions = participants.map(p => p.id);
@@ -2692,7 +2785,7 @@ By: ShotoBot | By: mikelennn | By: 2941160601`;
                 
                 // #listadmins
                 if (command === '#listadmins') {
-                    const groupMetadata = await sock.groupMetadata(remitente);
+                    const groupMetadata = await getGroupMetadataCached(remitente);
                     const admins = groupMetadata.participants.filter(p => p.admin === 'admin' || p.admin === 'superadmin');
                     let list = `╭━━〔 👑 𝐀𝐃𝐌𝐈𝐍𝐒 〕━━━⬣\n┃ 📌 Total: ${admins.length}\n`;
                     for (const admin of admins) {
@@ -2705,7 +2798,7 @@ By: ShotoBot | By: mikelennn | By: 2941160601`;
                 
                 // #listmiembros
                 if (command === '#listmiembros') {
-                    const groupMetadata = await sock.groupMetadata(remitente);
+                    const groupMetadata = await getGroupMetadataCached(remitente);
                     const participants = groupMetadata.participants;
                     let list = `╭━━〔 👥 𝐌𝐈𝐄𝐌𝐁𝐑𝐎𝐒 〕━⬣\n┃ 📌 Total: ${participants.length}\n`;
                     for (const member of participants) {
@@ -2737,3 +2830,4 @@ By: ShotoBot | By: mikelennn | By: 2941160601`;
 }
 
 iniciarBot().catch(err => console.log('Error:', err));
+

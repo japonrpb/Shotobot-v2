@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Buscar la línea de // #menu
+LINEA=$(grep -n "// #menu" bot.js | head -1 | cut -d: -f1)
+echo "Insertando antes de la línea: $LINEA"
+
+sed -i "${LINEA}i\\
+\\
+        // #addbot - Unirse a grupos con invitación\\
+        if (texto.startsWith('#addbot')) {\\
+            const link = texto.replace('#addbot', '').trim();\\
+            if (!link || !link.includes('chat.whatsapp.com')) {\\
+                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\\n┃ 📌 #addbot (link de invitación)\\n╰━━━━━━━━━━━━━━━━⬣' });\\
+                return;\\
+            }\\
+            await sock.sendMessage(remitente, { react: { text: '🕐', key: mensaje.key } });\\
+            try {\\
+                let code = link.split('chat.whatsapp.com/')[1];\\
+                code = code.split('?')[0];\\
+                code = code.split('/')[0];\\
+                if (!code || code.length < 5) throw new Error();\\
+                const groupInfo = await sock.groupGetInviteInfo(code);\\
+                const memberCount = groupInfo.size || groupInfo.participants?.length || 0;\\
+                if (memberCount < 15) {\\
+                    await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ADDBOT 〕━━━⬣\\n┃ 📌 Grupo con ' + memberCount + ' miembros\\n┃ ⚠️ Mínimo 15 miembros\\n╰━━━━━━━━━━━━━━━━⬣' });\\
+                    await sock.sendMessage(remitente, { react: { text: '❌', key: mensaje.key } });\\
+                    return;\\
+                }\\
+                await sock.sendMessage(remitente, { text: '╭━━〔 🔗 ADDBOT 〕━━━⬣\\n┃ ✅ Grupo: ' + (groupInfo.subject || 'Sin nombre') + '\\n┃ 👥 Miembros: ' + memberCount + '\\n┃ ⏳ Me uniré en 1 minuto...\\n╰━━━━━━━━━━━━━━━━⬣' });\\
+                await new Promise(resolve => setTimeout(resolve, 60000));\\
+                await sock.groupAcceptInvite(code);\\
+                await sock.sendMessage(remitente, { text: '╭━━〔 ✅ ADDBOT 〕━━━⬣\\n┃ 🎉 Me uní al grupo\\n┃ 👑 Dame admin\\n╰━━━━━━━━━━━━━━━━⬣', mentions: [sender] });\\
+                await sock.sendMessage(remitente, { react: { text: '✅', key: mensaje.key } });\\
+            } catch (error) {\\
+                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\\n┃ ⚠️ Link inválido o expirado\\n╰━━━━━━━━━━━━━━━━⬣' });\\
+                await sock.sendMessage(remitente, { react: { text: '❌', key: mensaje.key } });\\
+            }\\
+        }\\
+" bot.js
+
+echo "✅ #addbot agregado correctamente"

@@ -1,0 +1,27 @@
+        // #playaudio - Audio simple
+        if (texto.startsWith('#playaudio')) {
+            const busqueda = texto.replace('#playaudio', '').trim();
+            if (!busqueda) {
+                await sock.sendMessage(remitente, { text: 'ERROR: #playaudio (nombre de cancion)' });
+                return;
+            }
+            await sock.sendMessage(remitente, { react: { text: '🕐', key: mensaje.key } });
+            try {
+                const { exec } = require('child_process');
+                const util = require('util');
+                const execPromise = util.promisify(exec);
+                const fs = require('fs');
+                if (!fs.existsSync('./tmp')) fs.mkdirSync('./tmp');
+                const output = './tmp/audio_' + Date.now() + '.mp3';
+                const cmd = '/data/data/com.termux/files/usr/bin/yt-dlp -x --audio-format mp3 -o "' + output + '" "ytsearch1:' + busqueda.replace(/"/g, '\\"') + '"';
+                await execPromise(cmd, { timeout: 60000 });
+                if (fs.existsSync(output)) {
+                    await sock.sendMessage(remitente, { audio: fs.readFileSync(output), mimetype: 'audio/mpeg', fileName: 'audio.mp3' });
+                    fs.unlinkSync(output);
+                    await sock.sendMessage(remitente, { react: { text: '✅', key: mensaje.key } });
+                }
+            } catch (e) {
+                await sock.sendMessage(remitente, { text: 'ERROR: No se pudo obtener el audio' });
+                await sock.sendMessage(remitente, { react: { text: '❌', key: mensaje.key } });
+            }
+        }

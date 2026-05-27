@@ -38,84 +38,38 @@ let protection = loadData(PROTECTION_FILE, {});
 let games = loadData(GAMES_FILE, {});
 let economy = loadData(ECONOMY_FILE, {});
 let cooldowns = loadData(COOLDOWNS_FILE, {});
-
-// Configuración de bienvenidas y despedidas
-let welcomeSettings = loadData('./bot_data/welcome.json', {});
-let goodbyeSettings = loadData('./bot_data/goodbye.json', {});
-
-const defaultWelcomeMsg = '╭━━〔 🎉 𝐁𝐈𝐄𝐍𝐕𝐄𝐍𝐈𝐃𝐀 〕━━⬣\n┃ 👤 @user\n┃ ✨ ¡Bienvenido al grupo!\n┃ 📌 Lee las reglas y diviértete\n╰━━━━━━━━━━━━━━━━⬣';
-const defaultGoodbyeMsg = '╭━━〔 👋 𝐃𝐄𝐒𝐏𝐄𝐃𝐈𝐃𝐀 〕━━⬣\n┃ 👤 @user\n┃ 🚀 ¡Nos vemos pronto!\n┃ 💫 Siempre serás bienvenido\n╰━━━━━━━━━━━━━━━━⬣';
-
-function saveWelcomeConfig() { saveData('./bot_data/welcome.json', welcomeSettings); }
-function saveGoodbyeConfig() { saveData('./bot_data/goodbye.json', goodbyeSettings); }
-
 let spamTracker = {};
 let russianRouletteTimers = {};
 
 // Respuestas para 8ball (14 respuestas)
 const eightBallResponses = [
-    "✨ Sí, definitivamente",
-    "🌟 Es seguro que sí",
-    "🎱 Sin duda",
-    "💫 Sí, claro",
-    "⭐ Lo más probable",
-    "✨ Las estrellas dicen que sí",
-    "🌙 Mejor no decirte ahora",
-    "⭐ Pregunta más tarde",
-    "💫 No puedo predecirlo ahora",
-    "✨ Concéntrate y pregunta de nuevo",
-    "🌟 No cuentes con ello",
-    "🎱 Mi respuesta es no",
-    "💫 Muy dudoso",
-    "✨ Las estrellas dicen que no"
+    "✨ Sí, definitivamente", "🌟 Es seguro que sí", "🎱 Sin duda", "💫 Sí, claro", 
+    "⭐ Lo más probable", "✨ Las estrellas dicen que sí", "🌙 Mejor no decirte ahora", 
+    "⭐ Pregunta más tarde", "💫 No puedo predecirlo ahora", "✨ Concéntrate y pregunta de nuevo", 
+    "🌟 No cuentes con ello", "🎱 Mi respuesta es no", "💫 Muy dudoso", "✨ Las estrellas dicen que no"
 ];
 
 // Verdades y Retos (20 cada uno)
 const truths = [
-    "¿Cuál es tu mayor miedo?",
-    "¿Has mentido alguna vez a tu mejor amigo?",
-    "¿Cuál es tu secreto más vergonzoso?",
-    "¿Qué fue lo peor que hiciste por amor?",
-    "¿Alguna vez has robado algo?",
-    "¿Cuál es tu mayor arrepentimiento?",
-    "¿Qué es lo que nadie sabe de ti?",
-    "¿Has fingido estar enfermo para no hacer algo?",
-    "¿Cuál es el peor consejo que has dado?",
-    "¿Qué cosa ilegal has hecho?",
-    "¿Qué es lo que más te avergüenza de tu pasado?",
-    "¿Has ghosteado a alguien?",
-    "¿Cuál es tu mayor inseguridad?",
-    "¿Qué mentira le dices más seguido a tus padres?",
-    "¿Has hecho algo malo y culpado a otro?",
-    "¿Cuál es tu obsesión secreta?",
-    "¿Qué es lo que más te arrepientes de haber dicho?",
-    "¿Alguna vez has espiado el teléfono de alguien?",
-    "¿Cuál es la peor cita que has tenido?",
-    "¿Qué cosa no harías ni por todo el dinero del mundo?"
+    "¿Cuál es tu mayor miedo?", "¿Has mentido alguna vez a tu mejor amigo?", "¿Cuál es tu secreto más vergonzoso?", 
+    "¿Qué fue lo peor que hiciste por amor?", "¿Alguna vez has robado algo?", "¿Cuál es tu mayor arrepentimiento?", 
+    "¿Qué es lo que nadie sabe de ti?", "¿Has fingido estar enfermo para no hacer algo?", "¿Cuál es el peor consejo que has dado?", 
+    "¿Qué cosa ilegal has hecho?", "¿Qué es lo que más te avergüenza de tu pasado?", "¿Has ghosteado a alguien?", 
+    "¿Cuál es tu mayor inseguridad?", "¿Qué mentira le dices más seguido a tus padres?", "¿Has hecho algo malo y culpado a otro?", 
+    "¿Cuál es tu obsesión secreta?", "¿Qué es lo que más te arrepientes de haber dicho?", "¿Alguna vez has espiado el teléfono de alguien?", 
+    "¿Cuál es la peor cita que has tenido?", "¿Qué cosa no harías ni por todo el dinero del mundo?"
 ];
 
 const dares = [
-    "🎭 Envía un mensaje diciendo 'me gustas' al 3er contacto de tu lista",
-    "💃 Baila 10 segundos y graba el audio",
-    "🎤 Canta una canción completa",
-    "📸 Envía tu última foto de galería",
-    "😡 Manda un audio insultando a alguien (sin ofender)",
-    "🧹 Di algo bonito al que te castigó",
-    "🤣 Haz reír a alguien con un chiste malo",
-    "📝 Escribe un poema de amor y envíalo",
-    "🎮 Haz el sonido de tu animal favorito",
-    "😎 Cambia tu foto de perfil por 1 hora",
-    "💬 Manda un mensaje con solo emojis",
-    "🔊 Grita 'SOY EL MEJOR' en un audio",
-    "📖 Cuenta un chiste malo",
-    "🎭 Imita a un famoso",
-    "😏 Haz una declaración de amor falsa",
-    "🎬 Actúa como si fueras un robot",
-    "🤪 Haz 10 sentadillas y graba el audio",
-    "😈 Di algo picante en un audio",
-    "🎤 Cuenta tu peor experiencia en el baño",
-    "💀 Haz el peor baile del mundo"
+    "🎭 Envía un mensaje diciendo 'me gustas' al 3er contacto de tu lista", "💃 Baila 10 segundos y graba el audio", 
+    "🎤 Canta una canción completa", "📸 Envía tu última foto de galería", "😡 Manda un audio insultando a alguien (sin ofender)", 
+    "🧹 Di algo bonito al que te castigó", "🤣 Haz reír a alguien con un chiste malo", "📝 Escribe un poema de amor y envíalo", 
+    "🎮 Haz el sonido de tu animal favorito", "😎 Cambia tu foto de perfil por 1 hora", "💬 Manda un mensaje con solo emojis", 
+    "🔊 Grita 'SOY EL MEJOR' en un audio", "📖 Cuenta un chiste malo", "🎭 Imita a un famoso", "😏 Haz una declaración de amor falsa", 
+    "🎬 Actúa como si fueras un robot", "🤪 Haz 10 sentadillas y graba el audio", "😈 Di algo picante en un audio", 
+    "🎤 Cuenta tu peor experiencia en el baño", "💀 Haz el peor baile del mundo"
 ];
+
 // Palabras para Wordle (30 palabras de 5 letras)
 const wordleWords = [
     "PERRO", "GATO", "CASA", "PERA", "MANO", "BOCA", "PELO", "RISA", "LUNA", "SOL",
@@ -125,9 +79,9 @@ const wordleWords = [
 
 // Palabras para Ahorcado (30 palabras)
 const hangmanWords = [
-    "ELEFANTE", "MARIPOSA", "CASTILLO", "BICICLETA", "CHOCOLATE", "TELEFONO", "COMPUTADORA",
-    "LIBRO", "ESCUELA", "MEDICO", "HOSPITAL", "AVION", "TREN", "CARRO", "MOTO", "CAMION",
-    "BUS", "TAXI", "BARCO", "SUBMARINO", "HELICOPTERO", "COHETE", "PLANETA", "GALAXIA",
+    "ELEFANTE", "MARIPOSA", "CASTILLO", "BICICLETA", "CHOCOLATE", "TELEFONO", "COMPUTADORA", 
+    "LIBRO", "ESCUELA", "MEDICO", "HOSPITAL", "AVION", "TREN", "CARRO", "MOTO", "CAMION", 
+    "BUS", "TAXI", "BARCO", "SUBMARINO", "HELICOPTERO", "COHETE", "PLANETA", "GALAXIA", 
     "UNIVERSO", "ATOMO", "MOLECULA", "CELULA", "ORGANO", "SISTEMA"
 ];
 
@@ -193,6 +147,7 @@ const battleTexts = [
     "💫 {p1} se multiplica en 10 clones, todos atacan a {p2} al mismo tiempo. ¡{winner} gana!",
     "🏆 {p1} y {p2} se dan tremenda pelea, pero al final {winner} levanta el trofeo!"
 ];
+
 // Chistes (30 chistes)
 const chistes = [
     "¿Qué le dice un jardinero a otro? ¡Nos vemos cuando podamos!",
@@ -328,6 +283,7 @@ const insultos = [
     "🔮 Ser feo es normal, pero tú ya es profesional",
     "👻 Más espantoso que un fantasma en Halloween"
 ];
+
 // Datos curiosos (30 datos)
 const datosCuriosos = [
     "🐙 Los pulpos tienen tres corazones y sangre azul.",
@@ -449,6 +405,7 @@ const arboles = [
     { nombre: "🍁 Arce", valor: 100, rareza: 3 },
     { nombre: "🌳 Roble milenario", valor: 300, rareza: 0.5 }
 ];
+
 // Items de aventura
 const aventuraItems = [
     { nombre: "🗺️ Mapa antiguo", valor: 50, rareza: 15 },
@@ -656,24 +613,6 @@ function sellInventoryItem(userId, nombre, cantidad) {
 async function iniciarBot() {
     const { state, saveCreds } = await useMultiFileAuthState('sesion_shotobot');
     
-    
-// CACHÉ PARA EVITAR RATE LIMIT
-const groupMetadataCache = new Map();
-
-async function getGroupMetadataCached(groupId) {
-    if (!groupId || !groupId.endsWith('@g.us')) {
-        return await sock.groupMetadata(groupId);
-    }
-    const now = Date.now();
-    const cached = groupMetadataCache.get(groupId);
-    if (cached && (now - cached.time) < 300000) {
-        return cached.data;
-    }
-    const data = await sock.groupMetadata(groupId);
-    groupMetadataCache.set(groupId, { data, time: now });
-    return data;
-}
-
     const sock = makeWASocket({
         auth: state,
         printQRInTerminal: false
@@ -710,7 +649,7 @@ async function getGroupMetadataCached(groupId) {
 
     async function isAdmin(groupId, userId) {
         try {
-            const groupMetadata = await getGroupMetadataCached(groupId);
+            const groupMetadata = await sock.groupMetadata(groupId);
             const participants = groupMetadata.participants;
             const user = participants.find(p => p.id === userId);
             return user && (user.admin === 'admin' || user.admin === 'superadmin');
@@ -890,55 +829,8 @@ async function getGroupMetadataCached(groupId) {
         }
         return false;
     }
-    // Procesar mensajes para protecciones
-    
-    // Evento de bienvenida y despedida
-    sock.ev.on('group-participants.update', async (update) => {
-        try {
-            const { id, participants, action } = update;
-            if (action === 'add') {
-                for (const user of participants) {
-                    if (welcomeSettings[id] && welcomeSettings[id].enabled) {
-                        let mensaje = welcomeSettings[id].message || defaultWelcomeMsg;
-                        let userId = user;
-                        if (typeof user !== 'string') userId = user.id || user;
-                        let nombre = userId;
-                        try {
-                            const contact = await sock.contactQuery(userId);
-                            nombre = contact.name || contact.notify || userId.split('@')[0];
-                        } catch(e) {
-                            nombre = userId.split('@')[0];
-                        }
-                        mensaje = mensaje.replace(/@user/g, '@' + nombre);
-                        await sock.sendMessage(id, { text: mensaje, mentions: [userId] });
-                        await new Promise(resolve => setTimeout(resolve, 1000));
-                    }
-                }
-            }
-            if (action === 'remove') {
-                for (const user of participants) {
-                    if (goodbyeSettings[id] && goodbyeSettings[id].enabled) {
-                        let mensaje = goodbyeSettings[id].message || defaultGoodbyeMsg;
-                        let userId = user;
-                        if (typeof user !== 'string') userId = user.id || user;
-                        let nombre = userId;
-                        try {
-                            const contact = await sock.contactQuery(userId);
-                            nombre = contact.name || contact.notify || userId.split('@')[0];
-                        } catch(e) {
-                            nombre = userId.split('@')[0];
-                        }
-                        mensaje = mensaje.replace(/@user/g, '@' + nombre);
-                        await sock.sendMessage(id, { text: mensaje, mentions: [userId] });
-                        await new Promise(resolve => setTimeout(resolve, 1000));
-                    }
-                }
-            }
-        } catch(e) {
-            console.log('Error en evento de grupo:', e.message);
-        }
-    });
 
+    // Procesar mensajes para protecciones
     sock.ev.on('messages.upsert', async (m) => {
         const mensaje = m.messages[0];
         if (!mensaje.message) return;
@@ -1079,7 +971,7 @@ async function getGroupMetadataCached(groupId) {
         // #top
         if (texto.startsWith('#top') && isGroupChat) {
             const topic = texto.replace('#top', '').trim() || 'SIN TEMA';
-            const groupMetadata = await getGroupMetadataCached(remitente);
+            const groupMetadata = await sock.groupMetadata(remitente);
             const participants = groupMetadata.participants;
             const shuffled = [...participants].sort(() => 0.5 - Math.random());
             const top10 = shuffled.slice(0, 10);
@@ -1116,6 +1008,7 @@ async function getGroupMetadataCached(groupId) {
             let nivel = iq < 70 ? '🔴 Muy bajo' : iq < 90 ? '🟡 Bajo' : iq < 110 ? '🟢 Normal' : iq < 130 ? '🟣 Alto' : '🔵 Genio';
             await sock.sendMessage(remitente, { text: `╭━━〔 🧠 𝐈𝐐 𝐌𝐄𝐓𝐑𝐎 〕━━━⬣\n┃ 👤 @${await getContactName(target[0])}\n┃ 📊 ${iq} puntos\n┃ 🏷️ ${nivel}\n╰━━━━━━━━━━━━━━━━⬣`, mentions: target });
         }
+        
         // #femboy
         if (texto.startsWith('#femboy')) {
             let target = await getMentionedOrReplied(mensaje);
@@ -1252,7 +1145,7 @@ async function getGroupMetadataCached(groupId) {
         
         // #pareja
         if (texto === '#pareja' && isGroupChat) {
-            const groupMetadata = await getGroupMetadataCached(remitente);
+            const groupMetadata = await sock.groupMetadata(remitente);
             const participants = groupMetadata.participants;
             const shuffled = [...participants].sort(() => 0.5 - Math.random());
             const pareja1 = shuffled[0];
@@ -1295,6 +1188,7 @@ async function getGroupMetadataCached(groupId) {
             const dato = datosCuriosos[Math.floor(Math.random() * datosCuriosos.length)];
             await sock.sendMessage(remitente, { text: `╭━━〔 🔍 𝐃𝐀𝐓𝐎 𝐂𝐔𝐑𝐈𝐎𝐒𝐎 〕━⬣\n┃ ${dato}\n╰━━━━━━━━━━━━━━━━⬣` });
         }
+        
         // #wordle
         if (texto === '#wordle') {
             if (!games[remitente]) games[remitente] = {};
@@ -1439,202 +1333,6 @@ async function getGroupMetadataCached(groupId) {
             await sock.sendMessage(remitente, { text: `╭━━〔 🟡 𝐂𝐎𝐍𝐄𝐂𝐓𝐀 𝟒 〕━━━⬣\n${boardDisplay}\n┃ 🔴 Turno: @${await getContactName(game.turn === '🔴' ? game.players[0] : game.players[1])}\n╰━━━━━━━━━━━━━━━━⬣`, mentions: [game.players[0], game.players[1]] });
             saveData(GAMES_FILE, games);
         }
-        // ==================== COMANDOS DE DESCARGA ====================
-        
-        // #playaudio - Audio de YouTube
-        if (texto.startsWith('#playaudio')) {
-            const busqueda = texto.replace('#playaudio', '').trim();
-            if (!busqueda) {
-                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ 📌 #playaudio (nombre de cancion)\n╰━━━━━━━━━━━━━━━━⬣' });
-                return;
-            }
-            await sock.sendMessage(remitente, { react: { text: '🕐', key: mensaje.key } });
-            try {
-                const { exec } = require('child_process');
-                const util = require('util');
-                const execPromise = util.promisify(exec);
-                const fs3 = require('fs');
-                if (!fs3.existsSync('./tmp')) fs3.mkdirSync('./tmp');
-                const yt = '/data/data/com.termux/files/usr/bin/yt-dlp';
-                const outputPath = './tmp/audio_' + Date.now() + '.mp3';
-                let titulo = 'Audio';
-                let canal = 'Desconocido';
-                let vistas = 'N/A';
-                let miniatura = '';
-                try {
-                    const { stdout } = await execPromise(yt + ' -j "ytsearch1:' + busqueda.replace(/"/g, '\\"') + '" 2>/dev/null', { timeout: 15000 });
-                    const info = JSON.parse(stdout);
-                    titulo = info.title || 'Audio';
-                    canal = info.uploader || info.channel || 'Desconocido';
-                    vistas = info.view_count ? info.view_count.toLocaleString() : 'N/A';
-                    miniatura = info.thumbnail || '';
-                } catch(e) {}
-                if (miniatura) {
-                    await sock.sendMessage(remitente, { image: { url: miniatura }, caption: '╭━━〔 🎵 *PLAYAUDIO* 〕━━━⬣\n┃ 🎤 *' + titulo.substring(0, 50) + '*\n┃ 👤 ' + canal + '\n┃ 👁️ ' + vistas + '\n╰━━━━━━━━━━━━━━━━⬣' });
-                }
-                await execPromise(yt + ' -x --audio-format mp3 -o "' + outputPath + '" "ytsearch1:' + busqueda.replace(/"/g, '\\"') + '" 2>/dev/null', { timeout: 60000 });
-                if (fs3.existsSync(outputPath)) {
-                    await sock.sendMessage(remitente, { audio: fs3.readFileSync(outputPath), mimetype: 'audio/mpeg', fileName: titulo + '.mp3' });
-                    fs3.unlinkSync(outputPath);
-                    await sock.sendMessage(remitente, { react: { text: '✅', key: mensaje.key } });
-                } else {
-                    throw new Error('No se descargo');
-                }
-            } catch (error) {
-                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ ⚠️ No se pudo obtener el audio\n╰━━━━━━━━━━━━━━━━⬣' });
-                await sock.sendMessage(remitente, { react: { text: '❌', key: mensaje.key } });
-            }
-        }
-
-        // #tiktok - Video de TikTok
-        if (texto.startsWith('#tiktok')) {
-            const link = texto.replace('#tiktok', '').trim();
-            if (!link || !link.includes('tiktok.com')) {
-                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ 📌 #tiktok (link)\n╰━━━━━━━━━━━━━━━━⬣' });
-                return;
-            }
-            await sock.sendMessage(remitente, { react: { text: '🕐', key: mensaje.key } });
-            try {
-                const { exec } = require('child_process');
-                const util = require('util');
-                const execPromise = util.promisify(exec);
-                const fs3 = require('fs');
-                if (!fs3.existsSync('./tmp')) fs3.mkdirSync('./tmp');
-                const outputPath = './tmp/tiktok_' + Date.now() + '.mp4';
-                const yt = '/data/data/com.termux/files/usr/bin/yt-dlp';
-                await execPromise(yt + ' -f best -o "' + outputPath + '" "' + link.replace(/"/g, '\\"') + '" 2>/dev/null', { timeout: 30000 });
-                if (fs3.existsSync(outputPath)) {
-                    await sock.sendMessage(remitente, { video: fs3.readFileSync(outputPath), caption: '╭━━〔 🎵 *TIKTOK* 〕━━━⬣\n┃ ✅ Video descargado\n╰━━━━━━━━━━━━━━━━⬣' });
-                    fs3.unlinkSync(outputPath);
-                    await sock.sendMessage(remitente, { react: { text: '✅', key: mensaje.key } });
-                } else {
-                    throw new Error();
-                }
-            } catch (error) {
-                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ ⚠️ No se pudo descargar TikTok\n╰━━━━━━━━━━━━━━━━⬣' });
-                await sock.sendMessage(remitente, { react: { text: '❌', key: mensaje.key } });
-            }
-        }
-
-        // #youtube - Video de YouTube
-        if (texto.startsWith('#youtube')) {
-            const link = texto.replace('#youtube', '').trim();
-            if (!link || (!link.includes('youtube.com') && !link.includes('youtu.be'))) {
-                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ 📌 #youtube (link)\n╰━━━━━━━━━━━━━━━━⬣' });
-                return;
-            }
-            await sock.sendMessage(remitente, { react: { text: '🕐', key: mensaje.key } });
-            try {
-                const { exec } = require('child_process');
-                const util = require('util');
-                const execPromise = util.promisify(exec);
-                const fs3 = require('fs');
-                if (!fs3.existsSync('./tmp')) fs3.mkdirSync('./tmp');
-                const outputPath = './tmp/yt_' + Date.now() + '.mp4';
-                const yt = '/data/data/com.termux/files/usr/bin/yt-dlp';
-                await execPromise(yt + ' -f best -o "' + outputPath + '" "' + link.replace(/"/g, '\\"') + '" 2>/dev/null', { timeout: 60000 });
-                if (fs3.existsSync(outputPath)) {
-                    await sock.sendMessage(remitente, { video: fs3.readFileSync(outputPath), caption: '╭━━〔 🎬 *YOUTUBE* 〕━━━⬣\n┃ ✅ Video descargado\n╰━━━━━━━━━━━━━━━━⬣' });
-                    fs3.unlinkSync(outputPath);
-                    await sock.sendMessage(remitente, { react: { text: '✅', key: mensaje.key } });
-                } else {
-                    throw new Error();
-                }
-            } catch (error) {
-                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ ⚠️ No se pudo descargar\n╰━━━━━━━━━━━━━━━━⬣' });
-                await sock.sendMessage(remitente, { react: { text: '❌', key: mensaje.key } });
-            }
-        }
-
-        // #instagram - Video de Instagram
-        if (texto.startsWith('#instagram')) {
-            const link = texto.replace('#instagram', '').trim();
-            if (!link || !link.includes('instagram.com')) {
-                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ 📌 #instagram (link)\n╰━━━━━━━━━━━━━━━━⬣' });
-                return;
-            }
-            await sock.sendMessage(remitente, { react: { text: '🕐', key: mensaje.key } });
-            try {
-                const { exec } = require('child_process');
-                const util = require('util');
-                const execPromise = util.promisify(exec);
-                const fs3 = require('fs');
-                if (!fs3.existsSync('./tmp')) fs3.mkdirSync('./tmp');
-                const outputPath = './tmp/ig_' + Date.now() + '.mp4';
-                const yt = '/data/data/com.termux/files/usr/bin/yt-dlp';
-                await execPromise(yt + ' -f best -o "' + outputPath + '" "' + link.replace(/"/g, '\\"') + '" 2>/dev/null', { timeout: 30000 });
-                if (fs3.existsSync(outputPath)) {
-                    await sock.sendMessage(remitente, { video: fs3.readFileSync(outputPath), caption: '╭━━〔 📷 *INSTAGRAM* 〕━━━⬣\n┃ ✅ Video descargado\n╰━━━━━━━━━━━━━━━━⬣' });
-                    fs3.unlinkSync(outputPath);
-                    await sock.sendMessage(remitente, { react: { text: '✅', key: mensaje.key } });
-                } else {
-                    throw new Error();
-                }
-            } catch (error) {
-                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ ⚠️ No se pudo descargar\n╰━━━━━━━━━━━━━━━━⬣' });
-                await sock.sendMessage(remitente, { react: { text: '❌', key: mensaje.key } });
-            }
-        }
-
-        // #facebook - Video de Facebook
-        if (texto.startsWith('#facebook')) {
-            const link = texto.replace('#facebook', '').trim();
-            if (!link || (!link.includes('facebook.com') && !link.includes('fb.watch'))) {
-                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ 📌 #facebook (link)\n╰━━━━━━━━━━━━━━━━⬣' });
-                return;
-            }
-            await sock.sendMessage(remitente, { react: { text: '🕐', key: mensaje.key } });
-            try {
-                const { exec } = require('child_process');
-                const util = require('util');
-                const execPromise = util.promisify(exec);
-                const fs3 = require('fs');
-                if (!fs3.existsSync('./tmp')) fs3.mkdirSync('./tmp');
-                const outputPath = './tmp/fb_' + Date.now() + '.mp4';
-                const yt = '/data/data/com.termux/files/usr/bin/yt-dlp';
-                await execPromise(yt + ' -f best -o "' + outputPath + '" "' + link.replace(/"/g, '\\"') + '" 2>/dev/null', { timeout: 30000 });
-                if (fs3.existsSync(outputPath)) {
-                    await sock.sendMessage(remitente, { video: fs3.readFileSync(outputPath), caption: '╭━━〔 📘 *FACEBOOK* 〕━━━⬣\n┃ ✅ Video descargado\n╰━━━━━━━━━━━━━━━━⬣' });
-                    fs3.unlinkSync(outputPath);
-                    await sock.sendMessage(remitente, { react: { text: '✅', key: mensaje.key } });
-                } else {
-                    throw new Error();
-                }
-            } catch (error) {
-                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ ⚠️ No se pudo descargar\n╰━━━━━━━━━━━━━━━━⬣' });
-                await sock.sendMessage(remitente, { react: { text: '❌', key: mensaje.key } });
-            }
-        }
-
-        // #twitter - Video de Twitter/X
-        if (texto.startsWith('#twitter')) {
-            const link = texto.replace('#twitter', '').trim();
-            if (!link || (!link.includes('twitter.com') && !link.includes('x.com'))) {
-                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ 📌 #twitter (link)\n╰━━━━━━━━━━━━━━━━⬣' });
-                return;
-            }
-            await sock.sendMessage(remitente, { react: { text: '🕐', key: mensaje.key } });
-            try {
-                const { exec } = require('child_process');
-                const util = require('util');
-                const execPromise = util.promisify(exec);
-                const fs3 = require('fs');
-                if (!fs3.existsSync('./tmp')) fs3.mkdirSync('./tmp');
-                const outputPath = './tmp/tw_' + Date.now() + '.mp4';
-                const yt = '/data/data/com.termux/files/usr/bin/yt-dlp';
-                await execPromise(yt + ' -f best -o "' + outputPath + '" "' + link.replace(/"/g, '\\"') + '" 2>/dev/null', { timeout: 30000 });
-                if (fs3.existsSync(outputPath)) {
-                    await sock.sendMessage(remitente, { video: fs3.readFileSync(outputPath), caption: '╭━━〔 🐦 *TWITTER/X* 〕━━━⬣\n┃ ✅ Video descargado\n╰━━━━━━━━━━━━━━━━⬣' });
-                    fs3.unlinkSync(outputPath);
-                    await sock.sendMessage(remitente, { react: { text: '✅', key: mensaje.key } });
-                } else {
-                    throw new Error();
-                }
-            } catch (error) {
-                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ ⚠️ No se pudo descargar\n╰━━━━━━━━━━━━━━━━⬣' });
-                await sock.sendMessage(remitente, { react: { text: '❌', key: mensaje.key } });
-            }
-        }
         // ==================== COMANDOS DE ECONOMÍA ====================
         
         // #minar
@@ -1729,15 +1427,18 @@ async function getGroupMetadataCached(groupId) {
             const opcion = Math.random();
             
             if (opcion < 0.4) {
+                // Encuentra monedas
                 const monedas = Math.floor(Math.random() * 200) + 50;
                 user.wallet += monedas;
                 saveEconomyUser(sender, user);
                 await sock.sendMessage(remitente, { text: `╭━━〔 🗺️ 𝐀𝐕𝐄𝐍𝐓𝐔𝐑𝐀 〕━━━⬣\n┃ 🪙 ¡Encontraste ${monedas} shoCoins!\n┃ ✨ Una recompensa modesta\n╰━━━━━━━━━━━━━━━━⬣` });
             } else if (opcion < 0.7) {
+                // Encuentra item
                 const item = selectItemByRarity(aventuraItems);
                 addInventoryItem(sender, item);
                 await sock.sendMessage(remitente, { text: `╭━━〔 🗺️ 𝐀𝐕𝐄𝐍𝐓𝐔𝐑𝐀 〕━━━⬣\n┃ ✨ ¡Encontraste ${item.nombre}!\n┃ 💰 Valor: ${item.valor} shoCoins\n┃ 📦 Se ha añadido a tu inventario\n╰━━━━━━━━━━━━━━━━⬣` });
             } else {
+                // No encuentra nada
                 await sock.sendMessage(remitente, { text: `╭━━〔 🗺️ 𝐀𝐕𝐄𝐍𝐓𝐔𝐑𝐀 〕━━━⬣\n┃ 😔 No encontraste nada...\n┃ 🔍 Sigue explorando!\n╰━━━━━━━━━━━━━━━━⬣` });
             }
         }
@@ -1818,6 +1519,7 @@ async function getGroupMetadataCached(groupId) {
             
             await sock.sendMessage(remitente, { text: `╭━━〔 📅 𝐃𝐀𝐈𝐋𝐘 〕━━━━⬣\n┃ ✨ ¡Recompensa diaria!\n┃ 💰 Obtuviste: ${recompensa} shoCoins\n┃ 📅 Vuelve mañana por más\n╰━━━━━━━━━━━━━━━━⬣` });
         }
+        
         // #trabajar
         if (texto === '#trabajar') {
             const user = getEconomyUser(sender);
@@ -2014,9 +1716,10 @@ async function getGroupMetadataCached(groupId) {
             
             await sock.sendMessage(remitente, { text: `╭━━〔 🏦 𝐑𝐄𝐓𝐈𝐑𝐎 〕━━━━⬣\n┃ ✅ Retiraste ${cantidad} shoCoins\n┃ 🏦 Banco: ${user.bank} shoCoins\n┃ 💰 Cartera: ${user.wallet} shoCoins\n╰━━━━━━━━━━━━━━━━⬣` });
         }
+        
         // #rank
         if (texto === '#rank' && isGroupChat) {
-            const groupMetadata = await getGroupMetadataCached(remitente);
+            const groupMetadata = await sock.groupMetadata(remitente);
             const participants = groupMetadata.participants;
             const rankings = [];
             
@@ -2206,124 +1909,6 @@ async function getGroupMetadataCached(groupId) {
         }
         // ==================== MENÚ ====================
         
-        
-
-        // #bienvenida on/off
-        if (texto.startsWith('#bienvenida')) {
-            const args = texto.split(' ');
-            if (args.length < 2 || (args[1] !== 'on' && args[1] !== 'off')) {
-                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ 📌 #bienvenida on/off\n╰━━━━━━━━━━━━━━━━⬣' });
-                return;
-            }
-            const userIsAdmin = isGroupChat ? await isAdmin(remitente, sender) : true;
-            if (!userIsAdmin && !mensaje.key.fromMe) {
-                await sock.sendMessage(remitente, { react: { text: '❌', key: mensaje.key } });
-                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ ⚠️ Solo administradores\n╰━━━━━━━━━━━━━━━━⬣' });
-                return;
-            }
-            if (!welcomeSettings[remitente]) welcomeSettings[remitente] = {};
-            welcomeSettings[remitente].enabled = args[1] === 'on';
-            if (!welcomeSettings[remitente].message) welcomeSettings[remitente].message = defaultWelcomeMsg;
-            saveWelcomeConfig();
-            await sock.sendMessage(remitente, { react: { text: '✅', key: mensaje.key } });
-            await sock.sendMessage(remitente, { text: '╭━━〔 🎉 𝐁𝐈𝐄𝐍𝐕𝐄𝐍𝐈𝐃𝐀 〕━━⬣\n┃ ✅ Bienvenidas ' + (args[1] === 'on' ? 'activadas' : 'desactivadas') + '\n╰━━━━━━━━━━━━━━━━⬣' });
-        }
-
-        // #despedida on/off
-        if (texto.startsWith('#despedida')) {
-            const args = texto.split(' ');
-            if (args.length < 2 || (args[1] !== 'on' && args[1] !== 'off')) {
-                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ 📌 #despedida on/off\n╰━━━━━━━━━━━━━━━━⬣' });
-                return;
-            }
-            const userIsAdmin = isGroupChat ? await isAdmin(remitente, sender) : true;
-            if (!userIsAdmin && !mensaje.key.fromMe) {
-                await sock.sendMessage(remitente, { react: { text: '❌', key: mensaje.key } });
-                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ ⚠️ Solo administradores\n╰━━━━━━━━━━━━━━━━⬣' });
-                return;
-            }
-            if (!goodbyeSettings[remitente]) goodbyeSettings[remitente] = {};
-            goodbyeSettings[remitente].enabled = args[1] === 'on';
-            if (!goodbyeSettings[remitente].message) goodbyeSettings[remitente].message = defaultGoodbyeMsg;
-            saveGoodbyeConfig();
-            await sock.sendMessage(remitente, { react: { text: '✅', key: mensaje.key } });
-            await sock.sendMessage(remitente, { text: '╭━━〔 👋 𝐃𝐄𝐒𝐏𝐄𝐃𝐈𝐃𝐀 〕━━⬣\n┃ ✅ Despedidas ' + (args[1] === 'on' ? 'activadas' : 'desactivadas') + '\n╰━━━━━━━━━━━━━━━━⬣' });
-        }
-
-        // #setbienvenida
-        if (texto.startsWith('#setbienvenida')) {
-            const nuevoMensaje = texto.replace('#setbienvenida', '').trim();
-            if (!nuevoMensaje) {
-                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ 📌 #setbienvenida (tu mensaje)\n┃ 📌 Usa @user para etiquetar\n╰━━━━━━━━━━━━━━━━⬣' });
-                return;
-            }
-            const userIsAdmin = isGroupChat ? await isAdmin(remitente, sender) : true;
-            if (!userIsAdmin && !mensaje.key.fromMe) {
-                await sock.sendMessage(remitente, { react: { text: '❌', key: mensaje.key } });
-                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ ⚠️ Solo administradores\n╰━━━━━━━━━━━━━━━━⬣' });
-                return;
-            }
-            if (!welcomeSettings[remitente]) welcomeSettings[remitente] = {};
-            welcomeSettings[remitente].message = nuevoMensaje;
-            saveWelcomeConfig();
-            await sock.sendMessage(remitente, { react: { text: '✅', key: mensaje.key } });
-            await sock.sendMessage(remitente, { text: '╭━━〔 🎉 𝐁𝐈𝐄𝐍𝐕𝐄𝐍𝐈𝐃𝐀 〕━━⬣\n┃ ✅ Mensaje de bienvenida actualizado\n╰━━━━━━━━━━━━━━━━⬣' });
-        }
-
-        // #setdespedida
-        if (texto.startsWith('#setdespedida')) {
-            const nuevoMensaje = texto.replace('#setdespedida', '').trim();
-            if (!nuevoMensaje) {
-                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ 📌 #setdespedida (tu mensaje)\n┃ 📌 Usa @user para etiquetar\n╰━━━━━━━━━━━━━━━━⬣' });
-                return;
-            }
-            const userIsAdmin = isGroupChat ? await isAdmin(remitente, sender) : true;
-            if (!userIsAdmin && !mensaje.key.fromMe) {
-                await sock.sendMessage(remitente, { react: { text: '❌', key: mensaje.key } });
-                await sock.sendMessage(remitente, { text: '╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ ⚠️ Solo administradores\n╰━━━━━━━━━━━━━━━━⬣' });
-                return;
-            }
-            if (!goodbyeSettings[remitente]) goodbyeSettings[remitente] = {};
-            goodbyeSettings[remitente].message = nuevoMensaje;
-            saveGoodbyeConfig();
-            await sock.sendMessage(remitente, { react: { text: '✅', key: mensaje.key } });
-            await sock.sendMessage(remitente, { text: '╭━━〔 👋 𝐃𝐄𝐒𝐏𝐄𝐃𝐈𝐃𝐀 〕━━⬣\n┃ ✅ Mensaje de despedida actualizado\n╰━━━━━━━━━━━━━━━━⬣' });
-        }
-
-
-
-        // #addbot - Unirse a grupos
-        if (texto.startsWith("#addbot")) {
-            const link = texto.replace("#addbot", "").trim();
-            if (!link || !link.includes("chat.whatsapp.com")) {
-                await sock.sendMessage(remitente, { text: "╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ 📌 #addbot (link de invitación)\n╰━━━━━━━━━━━━━━━━⬣" });
-                return;
-            }
-            await sock.sendMessage(remitente, { react: { text: "🕐", key: mensaje.key } });
-            try {
-                let code = link.split("chat.whatsapp.com/")[1];
-                code = code.split("?")[0];
-                code = code.split("/")[0];
-                if (!code || code.length < 5) throw new Error();
-                const groupInfo = await sock.groupGetInviteInfo(code);
-                const memberCount = groupInfo.size || groupInfo.participants?.length || 0;
-                if (memberCount < 15) {
-                    await sock.sendMessage(remitente, { text: "╭━━〔 ❌ ADDBOT 〕━━━⬣\n┃ 📌 Grupo con " + memberCount + " miembros\n┃ ⚠️ Mínimo 15 miembros\n╰━━━━━━━━━━━━━━━━⬣" });
-                    await sock.sendMessage(remitente, { react: { text: "❌", key: mensaje.key } });
-                    return;
-                }
-                await sock.sendMessage(remitente, { text: "╭━━〔 🔗 ADDBOT 〕━━━⬣\n┃ ✅ Grupo: " + (groupInfo.subject || "Sin nombre") + "\n┃ 👥 Miembros: " + memberCount + "\n┃ ⏳ Me uniré en 1 minuto...\n╰━━━━━━━━━━━━━━━━⬣" });
-                await new Promise(resolve => setTimeout(resolve, 60000));
-                await sock.groupAcceptInvite(code);
-                await sock.sendMessage(remitente, { text: "╭━━〔 ✅ ADDBOT 〕━━━⬣\n┃ 🎉 Me uní al grupo\n┃ 👑 Dame admin\n╰━━━━━━━━━━━━━━━━⬣", mentions: [sender] });
-                await sock.sendMessage(remitente, { react: { text: "✅", key: mensaje.key } });
-            } catch (error) {
-                await sock.sendMessage(remitente, { text: "╭━━〔 ❌ ERROR 〕━━━━⬣\n┃ ⚠️ Link inválido o expirado\n╰━━━━━━━━━━━━━━━━⬣" });
-                await sock.sendMessage(remitente, { react: { text: "❌", key: mensaje.key } });
-            }
-        }
-
-
         // #menu
         if (texto === '#menu') {
             const nombreUsuario = await getContactName(sender);
@@ -2333,7 +1918,7 @@ async function getGroupMetadataCached(groupId) {
             const menu = `╭━━〔 🤍 𝐒𝐇𝐎𝐓𝐎𝐁𝐎𝐓 ♥ 〕━━⊷
 ┃ 👤 Usuario: @${nombreUsuario}
 ┃ 🤖 Versión: Beta 2.0
-┃ 🧠 Comandos: 82
+┃ 🧠 Comandos: 75
 ┃ 🏆 Nivel: proximamente
 ┃ ✨ XP: proximamente
 ┃ 💰 ShoCoins: ${totalCoins}
@@ -2504,21 +2089,6 @@ async function getGroupMetadataCached(groupId) {
 ┃ \`Hornear comida\`
 ╰━━━━━━━━━━━━━━━━━━━⬣
 
-╭━━〔 📥 𝐃𝐄𝐒𝐂𝐀𝐑𝐆𝐀𝐒 〕━━⊷
-┃ 📥 #playaudio (texto)
-┃ \`Envía audio de YouTube\`
-┃ 📥 #tiktok (link)
-┃ \`Descarga TikTok sin marca\`
-┃ 📥 #youtube (link)
-┃ \`Descargar video YT\`
-┃ 📥 #instagram (link)
-┃ \`Descargar video IG\`
-┃ 📥 #facebook (link)
-┃ \`Descargar video FB\`
-┃ 📥 #twitter (link)
-┃ \`Descargar video X\`
-╰━━━━━━━━━━━━━━━━━━━⬣
-
 By: ShotoBot | By: mikelennn | By: 2941160601`;
             
             const imgPath = '/sdcard/Pictures/shotobot/shotobot.menu.jpg';
@@ -2528,6 +2098,7 @@ By: ShotoBot | By: mikelennn | By: 2941160601`;
                 await sock.sendMessage(remitente, { text: menu, mentions: [sender] });
             }
         }
+        
         // ==================== COMANDOS DE ADMINISTRACIÓN ====================
         
         if (isGroupChat) {
@@ -2751,7 +2322,7 @@ By: ShotoBot | By: mikelennn | By: 2941160601`;
                 
                 // #tagall
                 if (command === '#tagall') {
-                    const groupMetadata = await getGroupMetadataCached(remitente);
+                    const groupMetadata = await sock.groupMetadata(remitente);
                     const participants = groupMetadata.participants;
                     const message = texto.replace('#tagall', '').trim() || 'Sin mensaje';
                     const mentions = participants.map(p => p.id);
@@ -2763,7 +2334,7 @@ By: ShotoBot | By: mikelennn | By: 2941160601`;
                 
                 // #listadmins
                 if (command === '#listadmins') {
-                    const groupMetadata = await getGroupMetadataCached(remitente);
+                    const groupMetadata = await sock.groupMetadata(remitente);
                     const admins = groupMetadata.participants.filter(p => p.admin === 'admin' || p.admin === 'superadmin');
                     let list = `╭━━〔 👑 𝐀𝐃𝐌𝐈𝐍𝐒 〕━━━⬣\n┃ 📌 Total: ${admins.length}\n`;
                     for (const admin of admins) {
@@ -2776,7 +2347,7 @@ By: ShotoBot | By: mikelennn | By: 2941160601`;
                 
                 // #listmiembros
                 if (command === '#listmiembros') {
-                    const groupMetadata = await getGroupMetadataCached(remitente);
+                    const groupMetadata = await sock.groupMetadata(remitente);
                     const participants = groupMetadata.participants;
                     let list = `╭━━〔 👥 𝐌𝐈𝐄𝐌𝐁𝐑𝐎𝐒 〕━⬣\n┃ 📌 Total: ${participants.length}\n`;
                     for (const member of participants) {
@@ -2808,4 +2379,3 @@ By: ShotoBot | By: mikelennn | By: 2941160601`;
 }
 
 iniciarBot().catch(err => console.log('Error:', err));
-

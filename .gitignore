@@ -1,0 +1,7 @@
+node_modules/
+sesion_*
+session_*
+bot_data/
+tmp/
+*.bak
+*.log
